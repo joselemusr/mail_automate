@@ -1,6 +1,7 @@
-import subprocess
+import csv
 import sys
 import os
+import subprocess
 
 # Función para instalar un paquete si no está instalado
 def install_package(package):
@@ -49,16 +50,16 @@ except Exception as e:
     print(f"Error al conectar con Outlook: {e}")
     sys.exit(1)
 
-# Leer el archivo de texto y enviar correos
+# Leer el archivo de texto usando csv.reader para manejar comas dentro de comillas
 with open(archivo_txt, "r", encoding="utf-8") as file:
-    for index, line in enumerate(file.readlines(), start=2):
-        datos = line.strip().split(",")
-
-        if len(datos) < 5:
+    reader = csv.reader(file, quotechar='"', delimiter=',')
+    
+    for index, row in enumerate(reader, start=2):
+        if len(row) < 5:
             print(f"Fila {index}: Datos incompletos, se omite el envío.")
             continue
 
-        destinatario, cc, asunto, mensaje, adjuntos = datos
+        destinatario, cc, asunto, mensaje, adjuntos = row
 
         # Limpiar espacios en blanco
         destinatario = destinatario.strip()
@@ -73,7 +74,7 @@ with open(archivo_txt, "r", encoding="utf-8") as file:
             continue
 
         try:
-            # Crear el mensaje
+            # Crear el mensaje en Outlook
             mail = outlook.CreateItem(0)  # 0 = Email
             mail.To = destinatario
             mail.Subject = asunto
@@ -81,7 +82,7 @@ with open(archivo_txt, "r", encoding="utf-8") as file:
             mail.Body = mensaje
 
             # Agregar adjuntos si existen
-            if adjuntos:
+            if adjuntos and adjuntos != '""':  # Verifica si el campo adjuntos está vacío
                 adjuntos_lista = adjuntos.split(";")  # Separar múltiples archivos por punto y coma (;)
                 for adjunto in adjuntos_lista:
                     adjunto = adjunto.strip()
