@@ -63,6 +63,7 @@ with open(archivo_txt, "r", encoding="utf-8") as file:
 
         # Limpiar espacios en blanco
         destinatario = destinatario.strip()
+        print(f'destinatario antes de limpiar: {destinatario}')
         cc = cc.strip()
         asunto = asunto.strip()
         mensaje = mensaje.strip()
