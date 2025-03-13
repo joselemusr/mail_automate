@@ -62,8 +62,7 @@ with open(archivo_txt, "r", encoding="utf-8") as file:
         destinatario, cc, asunto, mensaje, adjuntos = row
 
         # Limpiar espacios en blanco
-        destinatario = destinatario.strip()
-        print(f'destinatario antes de limpiar: {destinatario}')
+        destinatario = destinatario #.strip()
         cc = cc.strip()
         asunto = asunto.strip()
         mensaje = mensaje.strip()
@@ -78,7 +77,6 @@ with open(archivo_txt, "r", encoding="utf-8") as file:
             # Crear el mensaje en Outlook
             mail = outlook.CreateItem(0)  # 0 = Email
             mail.To = destinatario
-            print(f'destinatario: {destinatario}')
             mail.Subject = asunto
             mail.CC = cc
             mail.Body = mensaje
@@ -88,6 +86,8 @@ with open(archivo_txt, "r", encoding="utf-8") as file:
                 adjuntos_lista = adjuntos.split(";")  # Separar múltiples archivos por punto y coma (;)
                 for adjunto in adjuntos_lista:
                     adjunto = adjunto.strip()
+                    if adjunto == "Adjuntos":
+                        continue
                     if os.path.exists(adjunto):  # Verificar si el archivo existe antes de adjuntar
                         mail.Attachments.Add(adjunto)
                         print(f"Adjunto agregado: {adjunto}")
@@ -95,8 +95,11 @@ with open(archivo_txt, "r", encoding="utf-8") as file:
                         print(f"Advertencia: No se encontró el archivo adjunto '{adjunto}', se omite.")
 
             # Enviar el correo
-            mail.Send()
-            print(f"Correo enviado a {destinatario}")
+            if "@" in destinatario:
+                mail.Send()
+                print(f"Correo enviado a {destinatario}")
+            else:
+                print(f"Omitir Encabezado: {destinatario}")
 
         except Exception as e:
             print(f"Error al enviar correo a {destinatario}: {e}")
