@@ -77,6 +77,7 @@ with open(archivo_txt, "r", encoding="utf-8") as file:
             # Crear el mensaje en Outlook
             mail = outlook.CreateItem(0)  # 0 = Email
             mail.To = destinatario
+            print(f'destinatario: {destinatario}')
             mail.Subject = asunto
             mail.CC = cc
             mail.Body = mensaje
