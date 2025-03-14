@@ -2,6 +2,7 @@ import csv
 import sys
 import os
 import subprocess
+import ctypes
 
 # Función para instalar un paquete si no está instalado
 def install_package(package):
@@ -37,6 +38,7 @@ if len(sys.argv) < 2:
     sys.exit(1)
 
 archivo_txt = sys.argv[1]
+remitente_permitido = sys.argv[2]
 
 # Verificar si el archivo existe
 if not os.path.exists(archivo_txt):
@@ -49,6 +51,29 @@ try:
 except Exception as e:
     print(f"Error al conectar con Outlook: {e}")
     sys.exit(1)
+
+def mostrar_mensaje(titulo, mensaje):
+    ctypes.windll.user32.MessageBoxW(0, mensaje, titulo, 0x40 | 0x1)  # 0x40 = Icono de información, 0x1 = Botón OK
+
+# Verificar que el correo de origen esté bien
+# cuentas_disponibles = [account.DisplayName for account in outlook.Session.Accounts]
+cuentas_disponibles = []
+namespace = outlook.GetNamespace("MAPI")
+
+for account in namespace.Folders:
+    cuentas_disponibles.append(account.Name)
+
+print(f'cuentas_disponibles: {cuentas_disponibles}')
+
+if remitente_permitido not in cuentas_disponibles:
+    print(f"Error: La cuenta '{remitente_permitido}' no está configurada en Outlook o no tiene permisos para enviar correos.")
+    mensaje_error = f"El correo '{remitente_permitido}' no está ingresado correctamente en la app de Outlook."
+    print(mensaje_error)
+    mostrar_mensaje("Error de Outlook", mensaje_error)
+    sys.exit(1)
+else:
+    print(f"La cuenta '{remitente_permitido}' está configurada y puede enviar correos.")
+
 
 # Leer el archivo de texto usando csv.reader para manejar comas dentro de comillas
 with open(archivo_txt, "r", encoding="utf-8") as file:
@@ -80,6 +105,7 @@ with open(archivo_txt, "r", encoding="utf-8") as file:
             mail.Subject = asunto
             mail.CC = cc
             mail.Body = mensaje
+            mail.SentOnBehalfOfName = remitente_permitido
 
             # Agregar adjuntos si existen
             if adjuntos and adjuntos != '""':  # Verifica si el campo adjuntos está vacío
@@ -90,7 +116,7 @@ with open(archivo_txt, "r", encoding="utf-8") as file:
                         continue
                     if os.path.exists(adjunto):  # Verificar si el archivo existe antes de adjuntar
                         mail.Attachments.Add(adjunto)
-                        print(f"Adjunto agregado: {adjunto}")
+                        # print(f"Adjunto agregado: {adjunto}")
                     else:
                         print(f"Advertencia: No se encontró el archivo adjunto '{adjunto}', se omite.")
 
