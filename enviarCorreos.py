@@ -84,7 +84,7 @@ with open(archivo_txt, "r", encoding="utf-8") as file:
             print(f"Fila {index}: Datos incompletos, se omite el envío.")
             continue
 
-        destinatario, cc, asunto, mensaje, adjuntos = row
+        destinatario, cc, cco, asunto, mensaje, adjuntos = row
 
         # Limpiar espacios en blanco
         destinatario = destinatario #.strip()
@@ -104,6 +104,7 @@ with open(archivo_txt, "r", encoding="utf-8") as file:
             mail.To = destinatario
             mail.Subject = asunto
             mail.CC = cc
+            mail.BCC = cco
             mail.Body = mensaje
             mail.SentOnBehalfOfName = remitente_permitido
 
