@@ -106,7 +106,15 @@ with open(archivo_txt, "r", encoding="utf-8") as file:
             mail.CC = cc
             mail.BCC = cco
             mail.Body = mensaje
-            mail.SentOnBehalfOfName = remitente_permitido
+            # mail.SentOnBehalfOfName = remitente_permitido
+            for account in outlook.Session.Accounts:
+                if remitente_permitido.lower() in account.SmtpAddress.lower():
+                    mail._oleobj_.Invoke(*(64209, 0, 8, 0, account))  # Set SendUsingAccount
+                    print(f"Correo configurado para enviarse desde: {account.SmtpAddress}")
+                    break
+            else:
+                print(f"Advertencia: No se encontró la cuenta '{remitente_permitido}' en Outlook. Se usará la predeterminada.")
+
 
             # Agregar adjuntos si existen
             if adjuntos and adjuntos != '""':  # Verifica si el campo adjuntos está vacío
